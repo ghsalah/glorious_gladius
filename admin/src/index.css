@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+
+/* Flower Distribution admin — base layer on top of Tailwind */
+html {
+  @apply antialiased;
+}
+
+body {
+  @apply m-0 min-h-dvh bg-slate-50 text-slate-900;
+}
+
+#root {
+  @apply min-h-dvh w-full max-w-none m-0 border-0 text-left;
+}

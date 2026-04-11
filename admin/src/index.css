@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* Glorious Gladius admin — base layer on top of Tailwind */
+/* Flower Distribution admin — base layer on top of Tailwind */
 html {
   @apply antialiased;
 }

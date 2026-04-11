@@ -40,7 +40,7 @@ class AdminLoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {
                     "message": (
-                        "Driver accounts use the Glorious Gladius Driver app. "
+                        "Driver accounts use the Flower Distribution Driver app. "
                         "This console is for administrators only."
                     )
                 }

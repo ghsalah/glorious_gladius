@@ -13,7 +13,7 @@ export function LoginPage() {
   const from = (location.state as { from?: { pathname: string } } | null)?.from
     ?.pathname
 
-  const [email, setEmail] = useState('admin@glorious-gladius.local')
+  const [email, setEmail] = useState('admin@flower-distribution.local')
   const [password, setPassword] = useState('')
 
   useEffect(() => {
@@ -97,7 +97,7 @@ export function LoginPage() {
         </form>
 
         <p className="mt-6 rounded-lg bg-slate-50 p-3 text-center text-xs text-slate-600">
-          Default admin: <strong>admin@glorious-gladius.local</strong> /{' '}
+          Default admin: <strong>admin@flower-distribution.local</strong> /{' '}
           <strong>admin@123</strong> (seeded on the server with{' '}
           <code className="text-xs">seed_admin</code>). Driver accounts cannot use this console.
         </p>

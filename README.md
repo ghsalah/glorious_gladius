@@ -1,4 +1,4 @@
-# Glorious Gladius
+# Flower Distribution
 
 MVP for a delivery company: admin dashboard (React + Vite), Django REST API with SQLite, and Google Maps for routing and live fleet views.
 
@@ -11,7 +11,7 @@ MVP for a delivery company: admin dashboard (React + Vite), Django REST API with
 ### Setup
 
 ```bash
-cd glorious_gladius/backend
+cd flower_distribution/backend
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
@@ -22,7 +22,7 @@ python manage.py runserver 0.0.0.0:8000
 
 Default administrator (created by `seed_admin` if missing):
 
-- **Email:** `admin@glorious-gladius.local`
+- **Email:** `admin@flower-distribution.local`
 - **Password:** `admin@123`
 
 API routes (JSON, JWT `Authorization: Bearer …` except login):
@@ -44,7 +44,7 @@ Django admin (`/admin/`) uses the same user model; staff users can manage data t
 ### Setup
 
 ```bash
-cd glorious_gladius/admin
+cd flower_distribution/admin
 cp .env.example .env
 # Set VITE_API_URL to your API (default http://127.0.0.1:8000). Add VITE_GOOGLE_MAPS_API_KEY for maps.
 npm install

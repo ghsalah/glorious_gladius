@@ -7,7 +7,7 @@ class Command(BaseCommand):
     help = "Create the default administrator if missing."
 
     def handle(self, *args, **options):
-        email = "admin@flower-distribution.local"
+        email = "admin@glorious-gladius.local"
         if User.objects.filter(email__iexact=email).exists():
             self.stdout.write(self.style.WARNING(f"User {email} already exists — skipped."))
             return

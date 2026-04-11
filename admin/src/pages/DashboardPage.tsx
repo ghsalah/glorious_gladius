@@ -70,7 +70,7 @@ export function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Operations overview</h1>
         <p className="text-slate-600">
-          Flower Distribution — see every driver’s route on their own map below. For a single map with
+          Glorious Gladius — see every driver's route on their own map below. For a single map with
           all stop pins (no lines), use the{' '}
           <Link to="/deliveries" className="font-medium text-emerald-700 underline hover:text-emerald-900">
             Deliveries

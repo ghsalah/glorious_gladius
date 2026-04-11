@@ -13,7 +13,7 @@ import type {
   WarehouseDepot,
 } from '@/types'
 
-const TOKEN_KEY = 'flower_distribution_admin_token'
+const TOKEN_KEY = 'glorious_gladius_admin_token'
 
 export function getStoredToken(): string | null {
   return localStorage.getItem(TOKEN_KEY)

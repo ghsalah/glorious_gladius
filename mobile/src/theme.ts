@@ -39,7 +39,7 @@ export const THEME = {
     warehouse: '#7c3aed',
     driver: '#2563eb',
     destination: '#d97706',
-    routeLine: '#059669',
+    routeLine: '#4285F4',
   },
   shadow: {
     shadowColor: '#0f172a',

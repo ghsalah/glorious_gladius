@@ -5,6 +5,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { DeliveriesMap } from '@/components/DeliveriesMap'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { AddressAutocomplete } from '@/components/AddressAutocomplete'
 import { useDashboardData } from '@/contexts/DashboardDataContext'
 import {
   DELIVERY_STATUS_HEX,
@@ -369,14 +370,24 @@ export function DeliveriesPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-600">Address</label>
+                <label className="text-xs font-medium text-slate-600">Search Address</label>
+                <AddressAutocomplete 
+                  className="mt-1"
+                  placeholder="Enter street, city or zip..."
+                  onSelect={(addr, lat, lng) => {
+                    setForm(f => ({ ...f, address: addr, mapLinkOrCoords: `${lat}, ${lng}` }));
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-600">Full Address & Instructions</label>
                 <textarea
                   required
                   value={form.address}
                   onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                  placeholder="Street, number, postcode, city, instructions for the driver…"
-                  rows={5}
-                  className="mt-1 min-h-[120px] w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm leading-relaxed"
+                  placeholder="Review the address and add apartment number, gate code, or floor..."
+                  rows={3}
+                  className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm leading-relaxed"
                 />
               </div>
               <div>
@@ -471,12 +482,22 @@ export function DeliveriesPage() {
                 />
               </div>
               <div>
-                <label className="text-xs font-medium text-slate-600">Address</label>
+                <label className="text-xs font-medium text-slate-600">Search Address (to change location)</label>
+                <AddressAutocomplete 
+                  className="mt-1"
+                  placeholder="Start typing to update coordinates..."
+                  onSelect={(addr, lat, lng) => {
+                    setForm(f => ({ ...f, address: addr, mapLinkOrCoords: `${lat}, ${lng}` }));
+                  }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-600">Address Details</label>
                 <textarea
                   required
                   value={form.address}
                   onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
-                  rows={4}
+                  rows={3}
                   className="mt-1 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 />
               </div>
@@ -566,7 +587,16 @@ function DeliveryRow({
       <td className="px-4 py-3">
         <div className="flex flex-col gap-0.5">
           {statusPill(d.status)}
-          <span className="text-[10px] font-normal text-slate-400">Driver app</span>
+          <Link 
+            to={`/tracking/${d.id}`} 
+            className="text-[10px] font-bold text-emerald-600 hover:text-emerald-800 flex items-center gap-0.5 mt-1"
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Live Track
+          </Link>
         </div>
       </td>
       <td className="px-4 py-3 text-slate-700">

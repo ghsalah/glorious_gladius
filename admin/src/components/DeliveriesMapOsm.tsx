@@ -1,6 +1,7 @@
 /**
  * OpenStreetMap fallback when VITE_GOOGLE_MAPS_API_KEY is unset (Leaflet + OSM tiles).
  */
+import { useState, useEffect } from 'react'
 import { CircleMarker, MapContainer, Polyline, Popup, TileLayer } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -36,6 +37,72 @@ export interface ExtraPolyline {
   weight?: number
   opacity?: number
   dashArray?: string
+}
+
+const GEOAPIFY_API_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY;
+
+function RoutedPolylineOsm({ positions, pathOptions, isCompleted }: { positions: LatLng[], pathOptions: any, isCompleted?: boolean }) {
+  const [route, setRoute] = useState<LatLng[]>(positions);
+  const sig = JSON.stringify(positions.map(p => [p.lat.toFixed(4), p.lng.toFixed(4)]));
+
+  useEffect(() => {
+    let active = true;
+    async function getRoute() {
+      if (!GEOAPIFY_API_KEY || GEOAPIFY_API_KEY === 'YOUR_GEOAPIFY_API_KEY' || positions.length < 2) {
+        setRoute(positions);
+        return;
+      }
+      
+      // Don't fetch new route if it's completed, just show direct line or last known
+      if (isCompleted) {
+        setRoute(positions);
+        return;
+      }
+
+      try {
+        const coords = positions.map(p => `${p.lat},${p.lng}`).join('|');
+        const url = `https://api.geoapify.com/v1/routing?waypoints=${coords}&mode=drive&apiKey=${GEOAPIFY_API_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        
+        if (data.features && data.features.length > 0) {
+          // Requirement: Use ONLY the primary route (first feature)
+          const feature = data.features[0];
+          const geometry = feature.geometry;
+          const out: LatLng[] = [];
+
+          if (geometry.type === 'LineString') {
+            geometry.coordinates.forEach((pt: number[]) => {
+              out.push({ lat: pt[1], lng: pt[0] });
+            });
+          } else if (geometry.type === 'MultiLineString') {
+            geometry.coordinates.forEach((line: number[][]) => {
+              line.forEach((pt: number[]) => {
+                out.push({ lat: pt[1], lng: pt[0] });
+              });
+            });
+          }
+          
+          if (active && out.length > 1) {
+            setRoute(out);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('Geoapify Osm Error:', e);
+      }
+      if (active) setRoute(positions);
+    }
+    getRoute();
+    return () => { active = false; };
+  }, [sig, isCompleted]);
+
+  return <Polyline positions={route.map(p => [p.lat, p.lng] as [number, number])} pathOptions={pathOptions} />
+}
+
+function RoutedPolylineOsmFromTuples({ positions, pathOptions }: { positions: [number, number][], pathOptions: any }) {
+  const pts = positions.map(p => ({ lat: p[0], lng: p[1] }));
+  return <RoutedPolylineOsm positions={pts} pathOptions={pathOptions} />;
 }
 
 export interface DeliveriesMapOsmProps {
@@ -165,19 +232,19 @@ export function DeliveriesMapOsm({
             </CircleMarker>
           ) : null}
           {path.length > 1 ? (
-            <Polyline
-              positions={path.map((p) => [p.lat, p.lng] as [number, number])}
+            <RoutedPolylineOsm
+              positions={path}
               pathOptions={{
-                color: '#059669',
-                weight: 5,
-                opacity: 0.88,
+                color: '#10b981', // emerald-500
+                weight: 6,
+                opacity: 0.8,
                 lineCap: 'round',
                 lineJoin: 'round',
               }}
             />
           ) : null}
           {extraPolylines.map((pl) => (
-            <Polyline
+            <RoutedPolylineOsmFromTuples
               key={pl.key}
               positions={pl.positions}
               pathOptions={{
@@ -186,7 +253,6 @@ export function DeliveriesMapOsm({
                 opacity: pl.opacity ?? 0.85,
                 lineCap: 'round',
                 lineJoin: 'round',
-                dashArray: pl.dashArray,
               }}
             />
           ))}

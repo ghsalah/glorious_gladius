@@ -10,6 +10,7 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { DeliveriesPage } from '@/pages/DeliveriesPage'
 import { DriversPage } from '@/pages/DriversPage'
 import { LoginPage } from '@/pages/LoginPage'
+import { TrackingPage } from '@/pages/TrackingPage'
 import { WarehousePage } from '@/pages/WarehousePage'
 
 export default function App() {
@@ -27,6 +28,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="assign" element={<AssignDeliveriesPage />} />
           <Route path="deliveries" element={<DeliveriesPage />} />
+          <Route path="tracking/:deliveryId" element={<TrackingPage />} />
           <Route path="drivers" element={<DriversPage />} />
           <Route path="map" element={<Navigate to="/deliveries" replace />} />
           <Route path="warehouse" element={<WarehousePage />} />

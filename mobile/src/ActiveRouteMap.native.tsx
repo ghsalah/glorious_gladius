@@ -13,6 +13,8 @@ import MapView, { Marker, Polyline } from 'react-native-maps';
 import type { MapStyleElement } from 'react-native-maps';
 import { THEME } from './theme';
 
+const GEOAPIFY_API_KEY = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
+
 /** Light map — slate tones to match admin dashboard maps. */
 const MAP_STYLE_LIGHT: MapStyleElement[] = [
   { elementType: 'geometry', stylers: [{ color: '#f8fafc' }] },
@@ -113,7 +115,46 @@ export function ActiveRouteMap({
     return { latitude: warehouse.lat, longitude: warehouse.lng };
   }, [warehouse]);
 
+  const [routeCoords, setRouteCoords] = React.useState<MapCoord[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    async function getRoute() {
+      if (!driverLL || !destCoord || !GEOAPIFY_API_KEY || GEOAPIFY_API_KEY === 'YOUR_GEOAPIFY_API_KEY') {
+        setRouteCoords([]);
+        return;
+      }
+      try {
+        const url = `https://api.geoapify.com/v1/routing?waypoints=${driverLL.latitude},${driverLL.longitude}|${destCoord.latitude},${destCoord.longitude}&mode=drive&apiKey=${GEOAPIFY_API_KEY}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.features && data.features.length > 0) {
+          const geometry = data.features[0].geometry;
+          if (geometry.type === 'MultiLineString') {
+            const coords: MapCoord[] = [];
+            for (const line of geometry.coordinates) {
+              for (const point of line) {
+                // GeoJSON uses [longitude, latitude]
+                coords.push({ latitude: point[1], longitude: point[0] });
+              }
+            }
+            if (active) setRouteCoords(coords);
+          }
+        }
+      } catch (e) {
+        console.error('Geoapify Routing Error:', e);
+      }
+    }
+    getRoute();
+    return () => {
+      active = false;
+    };
+  }, [driverLL?.latitude, driverLL?.longitude, destCoord?.latitude, destCoord?.longitude]);
+
   const polylineCoords = useMemo(() => {
+    if (routeCoords.length > 0) {
+      return routeCoords;
+    }
     const parts: MapCoord[] = [];
     if (depotLL) parts.push(depotLL);
     for (const t of trailCoords) parts.push(t);
@@ -123,7 +164,7 @@ export function ActiveRouteMap({
     }
     if (parts.length < 2 && driverLL) return [driverLL];
     return parts;
-  }, [depotLL, trailCoords, destCoord, driverLL]);
+  }, [depotLL, trailCoords, destCoord, driverLL, routeCoords]);
 
   const fitPoints = useMemo(() => {
     const pts: MapCoord[] = [];
@@ -210,7 +251,13 @@ export function ActiveRouteMap({
             </Marker>
           ) : null}
           {polylineCoords.length >= 2 ? (
-            <Polyline coordinates={polylineCoords} strokeColor={THEME.map.routeLine} strokeWidth={3} />
+            <Polyline 
+              coordinates={polylineCoords} 
+              strokeColor={THEME.map.routeLine} 
+              strokeWidth={4}
+              lineCap="round"
+              lineJoin="round"
+            />
           ) : null}
         </MapView>
 

@@ -17,13 +17,13 @@ export const WAREHOUSE_HEX = '#7c3aed'
 
 /** Distinct polyline colors for multi-driver route preview (assign map). */
 export const ROUTE_PREVIEW_PALETTE = [
-  '#059669',
-  '#2563eb',
-  '#d97706',
+  '#4285F4', // Google Blue
+  '#EA4335', // Google Red
+  '#FBBC05', // Google Yellow
+  '#34A853', // Google Green
   '#7c3aed',
   '#db2777',
   '#0891b2',
-  '#ca8a04',
   '#4f46e5',
 ] as const
 

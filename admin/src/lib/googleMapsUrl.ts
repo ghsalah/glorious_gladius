@@ -37,9 +37,7 @@ export function parseLatLngFromGoogleMapsInput(raw: string): { lat: number; lng:
   const text = raw.trim()
   if (!text) return null
 
-  const trimmedLine = text.split(/\r?\n/).map((l) => l.trim()).find(Boolean) ?? text
-
-  const qMatch = trimmedLine.match(/[?&](?:q|query|ll)=([^&]+)/i)
+  const qMatch = text.match(/[?&](?:q|query|ll)=([^&\s]+)/i)
   if (qMatch) {
     const decoded = decodeURIComponent(qMatch[1].replace(/\+/g, ' '))
     const pair = decoded.match(COORD_PAIR)
@@ -49,25 +47,28 @@ export function parseLatLngFromGoogleMapsInput(raw: string): { lat: number; lng:
     }
   }
 
-  const at = trimmedLine.match(AT_COORD)
+  const at = text.match(AT_COORD)
   if (at) {
     const t = tryPair(at[1], at[2])
     if (t) return t
   }
 
-  const d34 = trimmedLine.match(PLACE_3D_4D)
+  const d34 = text.match(PLACE_3D_4D)
   if (d34) {
     const t = tryPair(d34[1], d34[2])
     if (t) return t
   }
 
-  const direct = trimmedLine.match(new RegExp(`^\\s*${COORD_PAIR.source}\\s*$`, 'i'))
-  if (direct) {
-    const t = tryPair(direct[1], direct[2])
-    if (t) return t
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
+  for (const line of lines) {
+    const direct = line.match(new RegExp(`^\\s*${COORD_PAIR.source}\\s*$`, 'i'))
+    if (direct) {
+      const t = tryPair(direct[1], direct[2])
+      if (t) return t
+    }
   }
 
-  const anywhere = trimmedLine.match(COORD_PAIR)
+  const anywhere = text.match(COORD_PAIR)
   if (anywhere) {
     const t = tryPair(anywhere[1], anywhere[2])
     if (t) return t
@@ -98,11 +99,6 @@ export function isShortMapsLink(text: string): boolean {
   )
 }
 
-function looksLikeHttpUrl(text: string): boolean {
-  return /^https?:\/\//i.test(text.trim())
-}
-
-/** Pull google.com/maps URLs out of HTML (redirect pages, embeds). */
 function extractGoogleMapsUrlsFromHtml(html: string): string[] {
   const seen = new Set<string>()
   const out: string[] = []
@@ -138,16 +134,12 @@ function tryParseFromHtmlDocument(html: string): { lat: number; lng: number } | 
 }
 
 /**
- * [Jina AI Reader](https://jina.ai/reader) fetches the resolved page as text; works well for
- * `maps.app.goo.gl` short links where other proxies time out.
+ * Fetches raw HTML via CodeTabs proxy.
  */
-async function fetchPageTextViaJina(url: string, signal?: AbortSignal): Promise<string | null> {
-  const jina = `https://r.jina.ai/${encodeURIComponent(url)}`
+async function fetchUrlContentsViaCodeTabs(url: string, signal?: AbortSignal): Promise<string | null> {
+  const proxy = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
   try {
-    const res = await fetch(jina, {
-      signal,
-      headers: { Accept: 'text/plain' },
-    })
+    const res = await fetch(proxy, { signal })
     if (!res.ok) return null
     return await res.text()
   } catch {
@@ -156,18 +148,17 @@ async function fetchPageTextViaJina(url: string, signal?: AbortSignal): Promise<
 }
 
 /**
- * Fetches URL HTML via AllOrigins (fallback if Jina fails).
+ * Fetches HTML via corsproxy.io fallback. 
  */
-async function fetchUrlContentsViaAllOrigins(
+async function fetchUrlContentsViaCorsProxyIo(
   url: string,
   signal?: AbortSignal,
 ): Promise<string | null> {
-  const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+  const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`
   try {
     const res = await fetch(proxy, { signal })
     if (!res.ok) return null
-    const data = (await res.json()) as { contents?: unknown }
-    return typeof data.contents === 'string' ? data.contents : null
+    return await res.text()
   } catch {
     return null
   }
@@ -175,7 +166,7 @@ async function fetchUrlContentsViaAllOrigins(
 
 /**
  * Resolves coordinates from plain text, a long Maps URL, or a short share link (best-effort).
- * Tries [Jina Reader](https://jina.ai/reader) first (reliable for `maps.app.goo.gl`), then AllOrigins.
+ * Uses proxies to bypass CORS and parse coordinate metadata off Maps redirect HTML.
  */
 export async function resolveGoogleMapsInputToLatLng(
   raw: string,
@@ -185,15 +176,18 @@ export async function resolveGoogleMapsInputToLatLng(
   if (direct) return direct
 
   const trimmed = raw.trim()
-  if (!trimmed || !looksLikeHttpUrl(trimmed)) return null
+  if (!trimmed) return null
 
-  const jina = await fetchPageTextViaJina(trimmed, signal)
-  if (jina) {
-    const fromJina = tryParseFromHtmlDocument(jina)
-    if (fromJina) return fromJina
+  const urlMatch = trimmed.match(/https?:\/\/[^\s>"]+/i)
+  if (!urlMatch) return null
+
+  const urlToFetch = urlMatch[0]
+
+  let html = await fetchUrlContentsViaCodeTabs(urlToFetch, signal)
+  if (!html) {
+    html = await fetchUrlContentsViaCorsProxyIo(urlToFetch, signal)
   }
 
-  const html = await fetchUrlContentsViaAllOrigins(trimmed, signal)
   if (!html) return null
 
   return tryParseFromHtmlDocument(html)

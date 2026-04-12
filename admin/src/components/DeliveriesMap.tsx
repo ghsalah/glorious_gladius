@@ -123,14 +123,21 @@ export function DeliveriesMap({
 
   const path = useMemo(() => {
     if (!onlyDriverId || !warehouse) return [] as LatLng[]
-    const routeStart = { lat: warehouse.lat, lng: warehouse.lng }
-    const driverDeliveries = deliveries.filter((d) => d.assignedDriverId === onlyDriverId)
-    const ordered = optimizeStopOrderFromDepot(routeStart, driverDeliveries)
+    const loc = visibleDriverLocs[0]
+    // If we have a driver location, start there. Otherwise start from warehouse.
+    const startPos = loc ? { lat: loc.lat, lng: loc.lng } : { lat: warehouse.lat, lng: warehouse.lng }
+    
+    // Filter for deliveries that are NOT completed yet for route planning
+    const openDeliveries = visibleDeliveries.filter(d => d.status !== 'completed')
+    if (!openDeliveries.length) return [] as LatLng[]
+    
+    const ordered = optimizeStopOrderFromDepot(startPos, openDeliveries)
     if (!ordered.length) return [] as LatLng[]
-    const pts: LatLng[] = [routeStart]
+    
+    const pts: LatLng[] = [startPos]
     ordered.forEach((d) => pts.push({ lat: d.lat, lng: d.lng }))
     return pts.length > 1 ? pts : []
-  }, [onlyDriverId, deliveries, warehouse])
+  }, [onlyDriverId, visibleDriverLocs, visibleDeliveries, warehouse])
 
   const perDriverPaths = useMemo(() => {
     if (!showGreedyRoutesPerDriver || onlyDriverId || !warehouse) return [] as { key: string; path: LatLng[]; color: string }[]
@@ -168,7 +175,6 @@ export function DeliveriesMap({
         color: p.color,
         weight: 4 as const,
         opacity: 0.82 as const,
-        dashArray: `${6 + (idx % 5) * 4}, ${12 + (idx % 4) * 3}`,
       })),
     [perDriverPaths],
   )

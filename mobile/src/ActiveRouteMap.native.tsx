@@ -13,7 +13,7 @@ import MapView, { Marker, Polyline } from 'react-native-maps';
 import type { MapStyleElement } from 'react-native-maps';
 import { THEME } from './theme';
 
-const GEOAPIFY_API_KEY = process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY;
+const GEOAPIFY_API_KEY = (typeof process !== 'undefined' && process.env) ? process.env.EXPO_PUBLIC_GEOAPIFY_API_KEY : undefined;
 
 /** Light map — slate tones to match admin dashboard maps. */
 const MAP_STYLE_LIGHT: MapStyleElement[] = [

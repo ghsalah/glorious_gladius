@@ -580,7 +580,14 @@ function DashboardScreen({ onLogout }: { onLogout: () => void }) {
     }
 
     void (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      let status: Location.PermissionStatus | undefined;
+      try {
+        const result = await Location.requestForegroundPermissionsAsync();
+        status = result.status;
+      } catch (e) {
+        console.warn('Location permission request failed', e);
+        return;
+      }
       if (cancelled || status !== 'granted') {
         if (status !== 'granted' && needsLocationWatch) {
           Alert.alert(

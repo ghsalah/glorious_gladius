@@ -39,7 +39,7 @@ function getDevMachineHost(): string {
 }
 
 function resolveApiBaseUrl(): string {
-  const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
+  const envUrl = (typeof process !== 'undefined' && process.env) ? process.env.EXPO_PUBLIC_API_BASE_URL?.trim() : undefined;
   if (envUrl) return stripTrailingSlash(envUrl);
 
   if (__DEV__) {

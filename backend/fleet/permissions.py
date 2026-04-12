@@ -7,3 +7,9 @@ class IsAdminUser(BasePermission):
     def has_permission(self, request, view):
         u = request.user
         return bool(u and u.is_authenticated and getattr(u, "role", None) == User.Role.ADMIN)
+
+
+class IsDriverUser(BasePermission):
+    def has_permission(self, request, view):
+        u = request.user
+        return bool(u and u.is_authenticated and getattr(u, "role", None) == User.Role.DRIVER)

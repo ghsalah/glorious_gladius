@@ -14,4 +14,14 @@ urlpatterns = [
     path("deliveries/<uuid:pk>/unassign", views.DeliveryUnassignView.as_view()),
     path("tracking/drivers/latest", views.DriverLocationsView.as_view()),
     path("settings/warehouse", views.WarehouseDepotView.as_view()),
+    
+    # Driver App Endpoints
+    path("driver-app/auth/login", views.DriverLoginView.as_view()),
+    path("driver-app/auth/change-password", views.DriverAppChangePasswordView.as_view()),
+    path("driver-app/me", views.DriverAppMeView.as_view()),
+    path("driver-app/route/accept", views.DriverAppAcceptRouteView.as_view()),
+    path("driver-app/deliveries", views.DriverAppDeliveriesView.as_view()),
+    path("driver-app/deliveries/<uuid:pk>/status", views.DriverAppDeliveryStatusView.as_view()),
+    path("driver-app/settings/warehouse", views.DriverAppWarehouseView.as_view()),
+    path("driver-app/location", views.DriverAppLocationView.as_view()),
 ]

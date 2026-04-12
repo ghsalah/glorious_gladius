@@ -3,6 +3,7 @@
  */
 import { useEffect, useState, type FormEvent } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import { PasswordInput } from '@/components/PasswordInput'
 import { useAuth } from '@/contexts/AuthContext'
 
 const BRAND_LOGO_SRC = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}glorious-gladius-logo.png`
@@ -69,24 +70,16 @@ export function LoginPage() {
               required
             />
           </div>
-          <div>
-            <label
-              htmlFor="password"
-              className="mb-1 block text-sm font-medium text-slate-700"
-            >
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none ring-emerald-500 focus:ring-2"
-              required
-              minLength={6}
-            />
-          </div>
+          <PasswordInput
+            id="password"
+            label="Password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="current-password"
+            required
+            minLength={6}
+            inputClassName="w-full rounded-lg border border-slate-200 px-3 py-2 pr-11 text-sm outline-none ring-emerald-500 focus:ring-2"
+          />
           <button
             type="submit"
             disabled={isSubmitting}

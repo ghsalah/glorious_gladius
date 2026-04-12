@@ -2,7 +2,7 @@
 
 export type UserRole = 'admin' | 'driver'
 
-export type DeliveryStatus = 'pending' | 'in_progress' | 'completed'
+export type DeliveryStatus = 'pending' | 'accepted' | 'in_progress' | 'completed'
 
 export interface AuthUser {
   id: string
@@ -20,6 +20,8 @@ export interface Driver {
   phone: string
   vehicleLabel: string
   isActive: boolean
+  /** From driver app *on duty* toggle; informational for dispatch. */
+  onDuty?: boolean
 }
 
 /** Admin creates a driver user + fleet row; password is set once (NestJS will hash server-side). */
@@ -38,6 +40,7 @@ export interface UpdateDriverPayload {
   phone?: string
   vehicleLabel?: string
   isActive?: boolean
+  onDuty?: boolean
   /** New password for the driver app; omit or empty to leave unchanged. */
   newPassword?: string
 }
@@ -52,6 +55,7 @@ export interface Delivery {
   /** Stop order after route optimization (null if unassigned). */
   sequenceOrder: number | null
   recipientName: string
+  recipientPhone: string
   notes?: string
   createdAt: string
 }

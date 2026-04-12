@@ -7,7 +7,9 @@ SECRET_KEY = "dev-only-change-in-production"
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+# In DEBUG, accept any Host (LAN IP, emulator, etc.) so phones and simulators can reach runserver.
+# For production, set DEBUG=False and list real hostnames.
+ALLOWED_HOSTS = ["*"] if DEBUG else ["localhost", "127.0.0.1"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -79,11 +81,18 @@ AUTH_USER_MODEL = "fleet.User"
 
 APPEND_SLASH = False
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-CORS_ALLOW_CREDENTIALS = True
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    # Incompatible with CORS_ALLOW_ALL_ORIGINS=True in django-cors-headers; API uses Bearer tokens, not cookies.
+    CORS_ALLOW_CREDENTIALS = False
+else:
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:8083",
+        "http://127.0.0.1:8083",
+    ]
+    CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (

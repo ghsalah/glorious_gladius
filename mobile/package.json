@@ -1,0 +1,38 @@
+{
+  "name": "mobile",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "start:lan": "expo start --host lan",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "eas:login": "eas login",
+    "eas:init": "eas init",
+    "eas:configure": "eas build:configure",
+    "build:android:apk": "eas build -p android --profile preview",
+    "prebuild:android": "expo prebuild --platform android",
+    "build:android:local-debug": "expo prebuild --platform android && cd android && gradlew.bat assembleDebug",
+    "build:android:local-debug:unix": "expo prebuild --platform android && cd android && chmod +x gradlew && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "~6.1.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "~54.0.33",
+    "expo-constants": "~18.0.13",
+    "expo-location": "~19.0.8",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-maps": "1.20.1",
+    "react-native-web": "^0.21.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.0",
+    "eas-cli": "^16.28.0",
+    "typescript": "~5.9.2"
+  },
+  "private": true
+}

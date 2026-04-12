@@ -13,6 +13,7 @@ import type { Delivery, DeliveryStatus } from '@/types'
 function statusPill(status: DeliveryStatus) {
   const map = {
     pending: 'bg-slate-100 text-slate-700',
+    accepted: 'bg-blue-100 text-blue-900',
     in_progress: 'bg-amber-100 text-amber-900',
     completed: 'bg-emerald-100 text-emerald-900',
   } as const

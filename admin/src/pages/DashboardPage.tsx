@@ -31,7 +31,7 @@ function countByStatus(deliveries: { status: DeliveryStatus }[]) {
       acc[d.status] += 1
       return acc
     },
-    { pending: 0, in_progress: 0, completed: 0 } as Record<DeliveryStatus, number>,
+    { pending: 0, accepted: 0, in_progress: 0, completed: 0 } as Record<DeliveryStatus, number>,
   )
 }
 
@@ -101,7 +101,7 @@ export function DashboardPage() {
         <StatCard
           label="In progress"
           value={status.in_progress}
-          hint={`${status.pending} pending · ${status.completed} completed`}
+          hint={`${status.pending} pending · ${status.accepted} accepted · ${status.completed} done`}
         />
       </div>
 

@@ -173,6 +173,7 @@ export async function updateDriverRemote(
     if (payload.phone !== undefined) body.phone = payload.phone
     if (payload.vehicleLabel !== undefined) body.vehicleLabel = payload.vehicleLabel
     if (payload.isActive !== undefined) body.isActive = payload.isActive
+    if (payload.onDuty !== undefined) body.onDuty = payload.onDuty
     if (payload.newPassword && payload.newPassword.length > 0) {
       body.new_password = payload.newPassword
     }
@@ -196,6 +197,7 @@ export async function createDeliveryRemote(payload: {
   lat: number
   lng: number
   recipientName: string
+  recipientPhone?: string
   notes?: string
 }): Promise<Delivery> {
   try {
@@ -204,6 +206,7 @@ export async function createDeliveryRemote(payload: {
       lat: payload.lat,
       lng: payload.lng,
       recipient_name: payload.recipientName,
+      recipient_phone: payload.recipientPhone ?? '',
       notes: payload.notes ?? '',
     })
     return data
@@ -219,6 +222,7 @@ export async function updateDeliveryRemote(
     lat?: number
     lng?: number
     recipientName?: string
+    recipientPhone?: string
     notes?: string
   },
 ): Promise<Delivery> {

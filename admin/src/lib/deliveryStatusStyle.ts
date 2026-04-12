@@ -3,6 +3,7 @@ import type { DeliveryStatus } from '@/types'
 /** Marker / map dot colors aligned with dashboard status pills. */
 export const DELIVERY_STATUS_HEX: Record<DeliveryStatus, string> = {
   pending: '#64748b',
+  accepted: '#2563eb',
   in_progress: '#d97706',
   completed: '#059669',
 }

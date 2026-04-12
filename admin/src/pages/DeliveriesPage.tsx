@@ -20,11 +20,12 @@ import {
 } from '@/lib/googleMapsUrl'
 import type { Delivery, DeliveryStatus } from '@/types'
 
-const STATUS_OPTIONS: DeliveryStatus[] = ['pending', 'in_progress', 'completed']
+const STATUS_OPTIONS: DeliveryStatus[] = ['pending', 'accepted', 'in_progress', 'completed']
 
 function statusPill(status: DeliveryStatus) {
   const map = {
     pending: 'bg-slate-100 text-slate-700',
+    accepted: 'bg-blue-100 text-blue-900',
     in_progress: 'bg-amber-100 text-amber-900',
     completed: 'bg-emerald-100 text-emerald-900',
   } as const
@@ -56,6 +57,7 @@ export function DeliveriesPage() {
   const [form, setForm] = useState({
     address: '',
     recipientName: '',
+    recipientPhone: '',
     mapLinkOrCoords: '',
     notes: '',
   })
@@ -117,12 +119,14 @@ export function DeliveriesPage() {
       lat: parsed.lat,
       lng: parsed.lng,
       recipientName: recipient,
+      recipientPhone: form.recipientPhone.trim() || undefined,
       notes: form.notes.trim() || undefined,
     })
     setShowCreate(false)
     setForm({
       address: '',
       recipientName: '',
+      recipientPhone: '',
       mapLinkOrCoords: '',
       notes: '',
     })
@@ -169,10 +173,11 @@ export function DeliveriesPage() {
       lat: coords.lat,
       lng: coords.lng,
       recipientName: recipient,
+      recipientPhone: form.recipientPhone.trim() || undefined,
       notes: form.notes.trim() || undefined,
     })
     setEditingDelivery(null)
-    setForm({ address: '', recipientName: '', mapLinkOrCoords: '', notes: '' })
+    setForm({ address: '', recipientName: '', recipientPhone: '', mapLinkOrCoords: '', notes: '' })
   }
 
   async function onDelete(id: string) {
@@ -190,8 +195,8 @@ export function DeliveriesPage() {
             when they finish a stop.
           </p>
           <p className="mt-2 text-sm text-slate-600">
-            The map uses the same status filter as the table: dot colors are pending (slate), in progress
-            (amber), and completed (green). Vans and warehouse have their own colors. For multi-driver route
+            The map uses the same status filter as the table: dot colors are pending (slate), accepted (blue),
+            in progress (amber), and completed (green). Vans and warehouse have their own colors. For multi-driver route
             lines from the depot, open the{' '}
             <Link to="/assign" className="font-medium text-emerald-700 underline hover:text-emerald-900">
               Assign to drivers
@@ -220,7 +225,7 @@ export function DeliveriesPage() {
             type="button"
             onClick={() => {
               setEditingDelivery(null)
-              setForm({ address: '', recipientName: '', mapLinkOrCoords: '', notes: '' })
+              setForm({ address: '', recipientName: '', recipientPhone: '', mapLinkOrCoords: '', notes: '' })
               setShowCreate(true)
             }}
             className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
@@ -295,6 +300,7 @@ export function DeliveriesPage() {
             <thead className="bg-slate-50 text-xs font-semibold uppercase text-slate-500">
               <tr>
                 <th className="px-4 py-2">Recipient</th>
+                <th className="px-4 py-2">Contact</th>
                 <th className="px-4 py-2">Address</th>
                 <th className="px-4 py-2">Status</th>
                 <th className="px-4 py-2">Driver</th>
@@ -320,6 +326,7 @@ export function DeliveriesPage() {
                     setForm({
                       address: delivery.address,
                       recipientName: delivery.recipientName,
+                      recipientPhone: delivery.recipientPhone ?? '',
                       mapLinkOrCoords: `${delivery.lat}, ${delivery.lng}`,
                       notes: delivery.notes ?? '',
                     })
@@ -348,6 +355,16 @@ export function DeliveriesPage() {
                   required
                   value={form.recipientName}
                   onChange={(e) => setForm((f) => ({ ...f, recipientName: e.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-slate-600">Contact Number</label>
+                <input
+                  required
+                  value={form.recipientPhone}
+                  onChange={(e) => setForm((f) => ({ ...f, recipientPhone: e.target.value }))}
+                  placeholder="e.g. +1234567890"
                   className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
                 />
               </div>
@@ -445,6 +462,15 @@ export function DeliveriesPage() {
                 />
               </div>
               <div>
+                <label className="text-xs font-medium text-slate-600">Contact Number</label>
+                <input
+                  required
+                  value={form.recipientPhone}
+                  onChange={(e) => setForm((f) => ({ ...f, recipientPhone: e.target.value }))}
+                  className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                />
+              </div>
+              <div>
                 <label className="text-xs font-medium text-slate-600">Address</label>
                 <textarea
                   required
@@ -481,7 +507,7 @@ export function DeliveriesPage() {
                   type="button"
                   onClick={() => {
                     setEditingDelivery(null)
-                    setForm({ address: '', recipientName: '', mapLinkOrCoords: '', notes: '' })
+                    setForm({ address: '', recipientName: '', recipientPhone: '', mapLinkOrCoords: '', notes: '' })
                   }}
                   className="rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100"
                 >
@@ -522,6 +548,18 @@ function DeliveryRow({
   return (
     <tr className="hover:bg-slate-50/80">
       <td className="px-4 py-3 font-medium text-slate-900">{d.recipientName}</td>
+      <td className="px-4 py-3 text-slate-600">
+        {d.recipientPhone ? (
+          <a
+            href={`tel:${d.recipientPhone}`}
+            className="font-medium text-emerald-700 underline decoration-emerald-200 hover:text-emerald-900"
+          >
+            {d.recipientPhone}
+          </a>
+        ) : (
+          <span className="text-slate-400 italic">No number</span>
+        )}
+      </td>
       <td className="max-w-xs truncate px-4 py-3 text-slate-600" title={d.address}>
         {d.address}
       </td>

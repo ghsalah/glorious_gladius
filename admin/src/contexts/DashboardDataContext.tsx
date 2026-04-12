@@ -50,6 +50,7 @@ interface DashboardDataValue {
     lat: number
     lng: number
     recipientName: string
+    recipientPhone?: string
     notes?: string
   }) => Promise<void>
   assignDelivery: (deliveryId: string, driverId: string, sequenceOrder?: number) => Promise<void>
@@ -61,6 +62,7 @@ interface DashboardDataValue {
       lat?: number
       lng?: number
       recipientName?: string
+      recipientPhone?: string
       notes?: string
     },
   ) => Promise<void>
@@ -122,7 +124,7 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
       void fetchDriverLocations()
         .then(setDriverLocations)
         .catch(() => {})
-    }, 15_000)
+    }, 5_000)
     return () => window.clearInterval(id)
   }, [])
 
@@ -132,6 +134,7 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
       lat: number
       lng: number
       recipientName: string
+      recipientPhone?: string
       notes?: string
     }) => {
       setIsMutating(true)
@@ -180,6 +183,7 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
         lat?: number
         lng?: number
         recipientName?: string
+        recipientPhone?: string
         notes?: string
       },
     ) => {

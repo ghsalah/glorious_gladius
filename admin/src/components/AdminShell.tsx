@@ -3,6 +3,7 @@
  */
 import { useState, type FormEvent } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { PasswordInput } from '@/components/PasswordInput'
 import { useAuth } from '@/contexts/AuthContext'
 import { changePasswordRequest } from '@/services/api'
 
@@ -63,50 +64,38 @@ function ChangePasswordModal({ onClose }: { onClose: () => void }) {
               {error}
             </p>
           ) : null}
-          <div>
-            <label htmlFor="cp-current" className="text-xs font-medium text-slate-600">
-              Current password
-            </label>
-            <input
-              id="cp-current"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="cp-new" className="text-xs font-medium text-slate-600">
-              New password
-            </label>
-            <input
-              id="cp-new"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={6}
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <label htmlFor="cp-confirm" className="text-xs font-medium text-slate-600">
-              Confirm new password
-            </label>
-            <input
-              id="cp-confirm"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={6}
-              value={newPasswordConfirm}
-              onChange={(e) => setNewPasswordConfirm(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-            />
-          </div>
+          <PasswordInput
+            id="cp-current"
+            label="Current password"
+            labelClassName="text-xs font-medium text-slate-600"
+            value={currentPassword}
+            onChange={setCurrentPassword}
+            autoComplete="current-password"
+            required
+            inputClassName="w-full rounded-lg border border-slate-200 px-3 py-2 pr-11 text-sm"
+          />
+          <PasswordInput
+            id="cp-new"
+            label="New password"
+            labelClassName="text-xs font-medium text-slate-600"
+            value={newPassword}
+            onChange={setNewPassword}
+            autoComplete="new-password"
+            required
+            minLength={6}
+            inputClassName="w-full rounded-lg border border-slate-200 px-3 py-2 pr-11 text-sm"
+          />
+          <PasswordInput
+            id="cp-confirm"
+            label="Confirm new password"
+            labelClassName="text-xs font-medium text-slate-600"
+            value={newPasswordConfirm}
+            onChange={setNewPasswordConfirm}
+            autoComplete="new-password"
+            required
+            minLength={6}
+            inputClassName="w-full rounded-lg border border-slate-200 px-3 py-2 pr-11 text-sm"
+          />
           <div className="flex justify-end gap-2 pt-2">
             <button
               type="button"

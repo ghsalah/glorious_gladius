@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Delivery, Driver, DriverLocation, User, WarehouseDepot
-from .permissions import IsAdminUser
 from .serializers import (
     AdminLoginSerializer,
     AssignDeliverySerializer,
@@ -15,12 +14,17 @@ from .serializers import (
     CreateDeliverySerializer,
     CreateDriverSerializer,
     DriverSerializer,
+    DriverLoginSerializer,
+    LocationUpdateSerializer,
     UpdateDeliverySerializer,
+    UpdateDeliveryStatusSerializer,
     UpdateDriverSerializer,
     WarehouseDepotSerializer,
     delivery_to_camel,
     location_to_camel,
+    user_display_name,
 )
+from .permissions import IsAdminUser, IsDriverUser
 
 
 def _tokens_for_user(user: User):
@@ -30,11 +34,15 @@ def _tokens_for_user(user: User):
 
 def _error_message(data) -> str:
     if isinstance(data, dict):
-        if "message" in data:
-            m = data["message"]
-            return m if isinstance(m, str) else str(m)
-        if "detail" in data:
-            return str(data["detail"])
+        # Prefer specific "message" or "detail" keys
+        for key in ["message", "detail", "non_field_errors"]:
+            if key in data:
+                m = data[key]
+                if isinstance(m, list) and m:
+                    return str(m[0])
+                return m if isinstance(m, str) else str(m)
+        
+        # Fallback: join other field errors
         parts = []
         for k, v in data.items():
             if isinstance(v, list) and v:
@@ -62,6 +70,27 @@ class AdminLoginView(APIView):
             {
                 "accessToken": token,
                 "user": AuthUserSerializer(user).data,
+            }
+        )
+
+
+class DriverLoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        ser = DriverLoginSerializer(data=request.data)
+        if not ser.is_valid():
+            return Response(
+                {"message": _error_message(ser.errors)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        user = ser.validated_data["user"]
+        token = _tokens_for_user(user)
+        return Response(
+            {
+                "accessToken": token,
+                "user": AuthUserSerializer(user).data,
+                "driverId": str(user.driver_profile.id),
             }
         )
 
@@ -244,6 +273,135 @@ class DriverLocationsView(APIView):
     def get(self, request):
         qs = DriverLocation.objects.select_related("driver").filter(driver__is_active=True)
         return Response([location_to_camel(loc) for loc in qs])
+
+
+class DriverAppMeView(APIView):
+    permission_classes = [IsAuthenticated, IsDriverUser]
+
+    def get(self, request):
+        driver = request.user.driver_profile
+        return Response(
+            {
+                "driverId": str(driver.id),
+                "name": user_display_name(request.user),
+                "email": request.user.email,
+                "vehicleLabel": driver.vehicle_label,
+                "onDuty": driver.on_duty,
+            }
+        )
+
+    def patch(self, request):
+        driver = request.user.driver_profile
+        on = request.data.get("onDuty")
+        if on is None or not isinstance(on, bool):
+            return Response(
+                {"message": "Provide onDuty as a boolean."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        driver.on_duty = on
+        driver.save(update_fields=["on_duty"])
+        return Response(
+            {
+                "driverId": str(driver.id),
+                "name": user_display_name(request.user),
+                "email": request.user.email,
+                "vehicleLabel": driver.vehicle_label,
+                "onDuty": driver.on_duty,
+            }
+        )
+
+
+class DriverAppChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated, IsDriverUser]
+
+    def post(self, request):
+        ser = ChangePasswordSerializer(data=request.data, context={"request": request})
+        if not ser.is_valid():
+            return Response(
+                {"message": _error_message(ser.errors)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        request.user.set_password(ser.validated_data["new_password"])
+        request.user.save()
+        return Response({"ok": True})
+
+
+class DriverAppAcceptRouteView(APIView):
+    permission_classes = [IsAuthenticated, IsDriverUser]
+
+    def post(self, request):
+        driver = request.user.driver_profile
+        pending = Delivery.objects.filter(
+            assigned_driver=driver,
+            status=Delivery.Status.PENDING,
+        )
+        count = pending.count()
+        if count == 0:
+            return Response({"acceptedCount": 0, "message": "No new stops to accept."})
+        pending.update(status=Delivery.Status.ACCEPTED)
+        return Response({"acceptedCount": count})
+
+
+class DriverAppDeliveriesView(APIView):
+    permission_classes = [IsAuthenticated, IsDriverUser]
+
+    def get(self, request):
+        if not hasattr(request.user, "driver_profile"):
+            return Response([])
+        driver = request.user.driver_profile
+        qs = Delivery.objects.filter(assigned_driver=driver).order_by("sequence_order", "created_at")
+        return Response([delivery_to_camel(d) for d in qs])
+
+
+class DriverAppDeliveryStatusView(APIView):
+    permission_classes = [IsAuthenticated, IsDriverUser]
+
+    def patch(self, request, pk):
+        try:
+            delivery = Delivery.objects.get(pk=pk, assigned_driver=request.user.driver_profile)
+        except Delivery.DoesNotExist:
+            return Response({"message": "Delivery not found or not assigned to you."}, status=status.HTTP_404_NOT_FOUND)
+
+        ser = UpdateDeliveryStatusSerializer(
+            delivery,
+            data=request.data,
+            partial=True,
+            context={"request": request},
+        )
+        if not ser.is_valid():
+            return Response({"message": _error_message(ser.errors)}, status=status.HTTP_400_BAD_REQUEST)
+
+        with transaction.atomic():
+            ser.save()
+            delivery.refresh_from_db()
+        return Response(delivery_to_camel(delivery))
+
+
+class DriverAppWarehouseView(APIView):
+    """Read-only depot coordinates for in-app navigation maps."""
+
+    permission_classes = [IsAuthenticated, IsDriverUser]
+
+    def get(self, request):
+        depot = _get_or_create_warehouse_depot()
+        return Response(WarehouseDepotSerializer(depot).data)
+
+
+class DriverAppLocationView(APIView):
+    permission_classes = [IsAuthenticated, IsDriverUser]
+
+    def put(self, request):
+        try:
+            driver = request.user.driver_profile
+        except AttributeError:
+            return Response({"message": "Driver profile missing."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        loc, created = DriverLocation.objects.get_or_create(driver=driver, defaults={'lat': 0, 'lng': 0})
+        ser = LocationUpdateSerializer(loc, data=request.data, partial=True)
+        if not ser.is_valid():
+             return Response({"message": _error_message(ser.errors)}, status=status.HTTP_400_BAD_REQUEST)
+        ser.save()
+        return Response(location_to_camel(loc))
 
 
 def _get_or_create_warehouse_depot() -> WarehouseDepot:

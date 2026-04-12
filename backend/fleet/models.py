@@ -30,6 +30,7 @@ class Driver(models.Model):
     phone = models.CharField(max_length=40)
     vehicle_label = models.CharField(max_length=80)
     is_active = models.BooleanField(default=True)
+    on_duty = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["user__first_name", "user__email"]
@@ -46,6 +47,7 @@ class Driver(models.Model):
 class Delivery(models.Model):
     class Status(models.TextChoices):
         PENDING = "pending", "pending"
+        ACCEPTED = "accepted", "accepted"
         IN_PROGRESS = "in_progress", "in_progress"
         COMPLETED = "completed", "completed"
 
@@ -63,6 +65,7 @@ class Delivery(models.Model):
     )
     sequence_order = models.PositiveIntegerField(null=True, blank=True)
     recipient_name = models.CharField(max_length=200)
+    recipient_phone = models.CharField(max_length=40, blank=True)
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

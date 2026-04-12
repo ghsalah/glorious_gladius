@@ -4,6 +4,7 @@
  */
 import { useState, type FormEvent } from 'react'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
+import { PasswordInput } from '@/components/PasswordInput'
 import { useDashboardData } from '@/contexts/DashboardDataContext'
 import type { Driver } from '@/types'
 
@@ -195,7 +196,7 @@ export function DriversPage() {
                 phone: values.phone,
                 vehicleLabel: values.vehicleLabel,
                 isActive: values.isActive,
-                newPassword: values.password || undefined,
+                newPassword: values.password.trim() || undefined,
               })
               setModal(null)
               setEditing(null)
@@ -380,34 +381,29 @@ function DriverModal({
               className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
             />
           </div>
-          <div>
-            <label className="text-xs font-medium text-slate-600">
-              {isEdit ? 'New password (optional)' : 'Password'}
-            </label>
-            <input
-              type="password"
-              autoComplete="new-password"
-              value={form.password}
-              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              required={!isEdit}
-              minLength={isEdit ? 0 : 6}
-            />
-          </div>
-          <div>
-            <label className="text-xs font-medium text-slate-600">
-              {isEdit ? 'Confirm new password' : 'Confirm password'}
-            </label>
-            <input
-              type="password"
-              autoComplete="new-password"
-              value={form.confirmPassword}
-              onChange={(e) => setForm((f) => ({ ...f, confirmPassword: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              required={!isEdit}
-              minLength={isEdit ? 0 : 6}
-            />
-          </div>
+          <PasswordInput
+            label={isEdit ? 'New password (optional)' : 'Password'}
+            labelClassName="text-xs font-medium text-slate-600"
+            value={form.password}
+            onChange={(password) => setForm((f) => ({ ...f, password }))}
+            autoComplete="new-password"
+            required={!isEdit}
+            minLength={isEdit ? 0 : 6}
+            inputClassName="w-full rounded-lg border border-slate-200 px-3 py-2 pr-11 text-sm"
+          />
+          <PasswordInput
+            label={isEdit ? 'Confirm new password' : 'Confirm password'}
+            labelClassName="text-xs font-medium text-slate-600"
+            value={form.confirmPassword}
+            onChange={(confirmPassword) => setForm((f) => ({ ...f, confirmPassword }))}
+            autoComplete="new-password"
+            required={!isEdit}
+            minLength={isEdit ? 0 : 6}
+            inputClassName="w-full rounded-lg border border-slate-200 px-3 py-2 pr-11 text-sm"
+          />
+          <p className="text-xs text-slate-500">
+            Passwords are checked for strength (avoid very common words or all numbers).
+          </p>
           <div>
             <label className="text-xs font-medium text-slate-600">Phone</label>
             <input

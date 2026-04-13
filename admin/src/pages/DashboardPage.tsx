@@ -2,9 +2,9 @@
  * Operational overview: counts and per-driver maps (routes only on those cards).
  */
 import { Link } from 'react-router-dom'
-import { DeliveriesMap } from '@/components/DeliveriesMap'
 import { LoadingSpinner } from '@/components/LoadingSpinner'
 import { useDashboardData } from '@/contexts/DashboardDataContext'
+import { FleetControlCenter } from '@/components/dashboard/FleetControlCenter'
 import type { DeliveryStatus } from '@/types'
 
 function StatCard({
@@ -105,47 +105,13 @@ export function DashboardPage() {
         />
       </div>
 
-      <section>
-        <h2 className="mb-2 text-lg font-semibold text-slate-800">Per-driver maps</h2>
-        <p className="mb-4 text-sm text-slate-600">
-          Each card is only that driver: their stops, van position, warehouse, and one greedy route
-          from the depot through open (non-completed) stops. There is no combined “all routes on one map”
-          view.
-        </p>
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {drivers
-            .filter((d) => d.isActive)
-            .map((dr) => {
-              const count = deliveries.filter((x) => x.assignedDriverId === dr.id).length
-              return (
-                <div
-                  key={dr.id}
-                  className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
-                >
-                  <div className="border-b border-slate-100 px-4 py-3">
-                    <p className="font-semibold text-slate-900">{dr.name}</p>
-                    <p className="text-xs text-slate-500">
-                      {dr.vehicleLabel}
-                      {count ? ` · ${count} assigned stop${count === 1 ? '' : 's'}` : ' · no assigned stops'}
-                    </p>
-                  </div>
-                  {count === 0 ? (
-                    <div className="flex h-[260px] items-center justify-center bg-slate-50 px-4 text-center text-sm text-slate-500">
-                      Assign deliveries to this driver to see their map and route.
-                    </div>
-                  ) : (
-                    <DeliveriesMap
-                      deliveries={deliveries}
-                      driverLocations={driverLocations}
-                      onlyDriverId={dr.id}
-                      warehouse={warehouse}
-                      className="h-[260px] min-h-[260px]"
-                    />
-                  )}
-                </div>
-              )
-            })}
-        </div>
+      <section className="mt-8">
+        <FleetControlCenter 
+          drivers={drivers}
+          deliveries={deliveries}
+          driverLocations={driverLocations}
+          warehouse={warehouse}
+        />
       </section>
     </div>
   )

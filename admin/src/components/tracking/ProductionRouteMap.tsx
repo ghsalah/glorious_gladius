@@ -66,8 +66,8 @@ function RoadSnappedMarker({ position, isOffRoute }: { position: LatLng, isOffRo
       <div style="transform: rotate(${heading}deg); transition: transform 0.4s ease-out;">
         <div class="relative flex items-center justify-center">
           <div class="absolute -inset-4 ${isOffRoute ? 'bg-red-500/20' : 'bg-emerald-500/20'} rounded-full animate-pulse"></div>
-          <div class="w-10 h-10 bg-slate-900 rounded-full shadow-2xl border-2 ${isOffRoute ? 'border-red-500' : 'border-emerald-400'} flex items-center justify-center">
-            <svg viewBox="0 0 24 24" class="w-6 h-6 ${isOffRoute ? 'text-red-400' : 'text-emerald-400'}" fill="currentColor">
+          <div class="w-10 h-10 bg-emerald-600 rounded-full shadow-2xl border-2 border-white flex items-center justify-center">
+            <svg viewBox="0 0 24 24" class="w-6 h-6 text-white" fill="currentColor">
               <path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z" />
             </svg>
           </div>
@@ -199,12 +199,12 @@ export function ProductionRouteMap({
     <div className={`relative group ${className}`}>
       {/* HUD Overview */}
       <div className="absolute top-8 left-8 z-[1000] flex flex-col gap-4">
-        <div className="bg-slate-900/90 backdrop-blur-2xl p-6 rounded-[32px] shadow-2xl border border-white/10 flex flex-col gap-4 min-w-[300px]">
+        <div className="bg-white/95 backdrop-blur-2xl p-6 rounded-[32px] shadow-2xl border border-slate-200 flex flex-col gap-4 min-w-[300px]">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">Mission Intelligence</span>
-            <div className={`flex items-center gap-1.5 px-2.5 py-1 ${isOffRoute ? 'bg-red-500/20 border-red-500/50' : 'bg-emerald-500/10 border-emerald-500/20'} border rounded-full`}>
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Mission Intelligence</span>
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 ${isOffRoute ? 'bg-red-50 border-red-200' : 'bg-emerald-50 border-emerald-100'} border rounded-full`}>
               <div className={`w-1.5 h-1.5 rounded-full ${isOffRoute ? 'bg-red-500 animate-ping' : 'bg-emerald-500'}`}></div>
-              <span className={`text-[9px] font-black uppercase ${isOffRoute ? 'text-red-500' : 'text-emerald-500'}`}>
+              <span className={`text-[9px] font-black uppercase ${isOffRoute ? 'text-red-700' : 'text-emerald-700'}`}>
                 {isOffRoute ? 'Deviation Alert' : 'On Schedule'}
               </span>
             </div>
@@ -212,7 +212,7 @@ export function ProductionRouteMap({
           
           <div className="flex items-center gap-4">
              <div className="flex-1">
-                <p className="text-3xl font-black text-white leading-none tracking-tighter">
+                <p className="text-3xl font-black text-slate-900 leading-none tracking-tighter">
                    {completedCount} / {sortedStops.length} 
                 </p>
                 <p className="text-slate-400 text-[10px] font-bold uppercase mt-1 tracking-widest">Deliveries Completed</p>
@@ -220,7 +220,7 @@ export function ProductionRouteMap({
              <button 
                onClick={handleSmartOptimization}
                disabled={isOptimizing || remainingStops.length < 2}
-               className="w-12 h-12 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-800 flex items-center justify-center border border-white/10 shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+               className="w-12 h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-200 flex items-center justify-center border border-white shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
                title="Smart Route Re-Order"
              >
                 {isOptimizing ? (
@@ -231,16 +231,16 @@ export function ProductionRouteMap({
              </button>
           </div>
 
-          <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+          <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-1000" 
+              className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-1000" 
               style={{ width: `${(completedCount / sortedStops.length) * 100}%` }}
             />
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-white/5">
-             <p className="text-[9px] font-bold text-slate-500 uppercase">Return Efficiency</p>
-             <p className="text-xs font-black text-white">{isOptimizing ? 'Recalculating...' : 'Optimized Path active'}</p>
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+             <p className="text-[9px] font-bold text-slate-400 uppercase">Return Efficiency</p>
+             <p className="text-xs font-black text-slate-900">{isOptimizing ? 'Recalculating...' : 'Optimized Path active'}</p>
           </div>
         </div>
       </div>
@@ -286,7 +286,7 @@ export function ProductionRouteMap({
         {warehouse && (
           <Marker position={[warehouse.lat, warehouse.lng]} icon={L.divIcon({
             className: 'w-marker',
-            html: `<div class="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center border-4 border-white shadow-2xl">
+            html: `<div class="w-12 h-12 bg-emerald-900 rounded-2xl flex items-center justify-center border-4 border-white shadow-2xl">
                      <svg class="text-white w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3L4 9V21H20V9L12 3M12 12.5C11.17 12.5 10.5 11.83 10.5 11C10.5 10.17 11.17 9.5 12 9.5C12.83 9.5 13.5 10.17 13.5 11C13.5 11.83 12.83 12.5 12 12.5Z"/></svg>
                    </div>`
           })}>

@@ -52,6 +52,7 @@ class DeliveryAdmin(admin.ModelAdmin):
 
 
 @admin.register(DriverLocation)
+
 class DriverLocationAdmin(admin.ModelAdmin):
     list_display = ("driver", "lat", "lng", "updated_at")
 

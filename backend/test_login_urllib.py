@@ -3,7 +3,7 @@ import urllib.request
 
 url = "http://127.0.0.1:8000/auth/login"
 data = json.dumps({
-    "email": "admin@flower-distribution.local",
+    "email": "admin@gmail.com",
     "password": "admin@123"
 }).encode('utf-8')
 

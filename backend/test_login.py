@@ -2,7 +2,7 @@ import requests
 
 url = "http://127.0.0.1:8000/auth/login"
 data = {
-    "email": "admin@flower-distribution.local",
+    "email": "admin@gmail.com",
     "password": "admin@123"
 }
 try:

@@ -655,12 +655,25 @@ function DashboardScreen({ onLogout }: { onLogout: () => void }) {
   }, [needsLocationWatch, hasInProgress]);
 
   const handleLogout = async () => {
+    // 1. Tell server we are off-duty first (while token is still valid)
+    try {
+      await apiCall('/driver-app/me', {
+        method: 'PATCH',
+        body: JSON.stringify({ onDuty: false }),
+      });
+    } catch { 
+      /* ignore if fails, we are logging out anyway */ 
+    }
+
+    // 2. Clear location watch
     if (locationSubscription.current) {
       try {
         locationSubscription.current.remove();
       } catch { /* expo-location web bug */ }
       locationSubscription.current = null;
     }
+
+    // 3. Clear auth
     await AsyncStorage.removeItem('driverToken');
     onLogout();
   };

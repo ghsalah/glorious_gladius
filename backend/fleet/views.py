@@ -271,7 +271,9 @@ class DriverLocationsView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request):
-        qs = DriverLocation.objects.select_related("driver").filter(driver__is_active=True)
+        qs = DriverLocation.objects.select_related("driver").filter(
+            driver__is_active=True, driver__on_duty=True
+        )
         return Response([location_to_camel(loc) for loc in qs])
 
 
